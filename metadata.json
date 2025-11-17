@@ -1,0 +1,18 @@
+{
+  "name": "Finnhub to BigQuery",
+  "description": "A streaming pipeline to process Finnhub data.",
+  "parameters": [
+    {
+      "name": "input_subscription",
+      "label": "Input Pub/Sub Subscription",
+      "helpText": "The Pub/Sub subscription to read messages from."
+    },
+    {
+      "name": "output_table",
+      "label": "Output BigQuery Table",
+      "helpText": "The BigQuery table to write results to."
+    }
+  ]
+}
+
+
