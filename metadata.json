@@ -11,6 +11,11 @@
       "name": "output_table",
       "label": "Output BigQuery Table",
       "helpText": "The BigQuery table to write results to."
+    },
+    {
+      "name": "failure_table",
+      "label": "Failure BigQuery Table",
+      "helpText": "The BigQuery table to write failed records to."
     }
   ]
 }

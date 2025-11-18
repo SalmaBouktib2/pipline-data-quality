@@ -15,7 +15,7 @@ output "dataflow_gcs_bucket" {
 
 output "bigquery_table_id" {
   description = "The ID of the BigQuery table."
-  value       = google_bigquery_table.trades_table.id
+  value       = google_bigquery_table.symbols_table.id
 }
 
 output "publisher_service_account_email" {

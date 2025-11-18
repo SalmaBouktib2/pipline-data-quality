@@ -71,20 +71,53 @@ resource "google_bigquery_dataset" "finnhub_dataset" {
   depends_on = [google_project_service.apis]
 }
 
-resource "google_bigquery_table" "trades_table" {
+resource "google_bigquery_table" "symbols_table" {
   dataset_id = google_bigquery_dataset.finnhub_dataset.dataset_id
-  table_id   = "trades"
+  table_id   = "symbols"
   project    = var.gcp_project_id
 
-  # The schema for our transformed data
+  # The schema for our symbol data
   schema     = <<EOF
 [
+  {"name": "currency", "type": "STRING", "mode": "NULLABLE"},
+  {"name": "description", "type": "STRING", "mode": "NULLABLE"},
+  {"name": "displaySymbol", "type": "STRING", "mode": "NULLABLE"},
+  {"name": "figi", "type": "STRING", "mode": "NULLABLE"},
+  {"name": "isin", "type": "STRING", "mode": "NULLABLE"},
+  {"name": "mic", "type": "STRING", "mode": "NULLABLE"},
+  {"name": "shareClassFIGI", "type": "STRING", "mode": "NULLABLE"},
   {"name": "symbol", "type": "STRING", "mode": "NULLABLE"},
-  {"name": "price", "type": "FLOAT64", "mode": "NULLABLE"},
-  {"name": "volume", "type": "FLOAT64", "mode": "NULLABLE"},
-  {"name": "trade_timestamp", "type": "TIMESTAMP", "mode": "NULLABLE"},
-  {"name": "conditions", "type": "STRING", "mode": "REPEATED"},
+  {"name": "symbol2", "type": "STRING", "mode": "NULLABLE"},
+  {"name": "type", "type": "STRING", "mode": "NULLABLE"},
   {"name": "processing_timestamp", "type": "TIMESTAMP", "mode": "REQUIRED"}
+]
+EOF
+  depends_on = [google_project_service.apis]
+}
+
+resource "google_bigquery_table" "symbols_failures_table" {
+  dataset_id = google_bigquery_dataset.finnhub_dataset.dataset_id
+  table_id   = "symbols_failures"
+  project    = var.gcp_project_id
+
+  # The schema for our validation failures
+  schema     = <<EOF
+[
+  {"name": "currency", "type": "STRING", "mode": "NULLABLE"},
+  {"name": "description", "type": "STRING", "mode": "NULLABLE"},
+  {"name": "displaySymbol", "type": "STRING", "mode": "NULLABLE"},
+  {"name": "figi", "type": "STRING", "mode": "NULLABLE"},
+  {"name": "isin", "type": "STRING", "mode": "NULLABLE"},
+  {"name": "mic", "type": "STRING", "mode": "NULLABLE"},
+  {"name": "shareClassFIGI", "type": "STRING", "mode": "NULLABLE"},
+  {"name": "symbol", "type": "STRING", "mode": "NULLABLE"},
+  {"name": "symbol2", "type": "STRING", "mode": "NULLABLE"},
+  {"name": "type", "type": "STRING", "mode": "NULLABLE"},
+  {"name": "processing_timestamp", "type": "TIMESTAMP", "mode": "REQUIRED"},
+  {"name": "error_type", "type": "STRING", "mode": "NULLABLE"},
+  {"name": "dq_dimension", "type": "STRING", "mode": "NULLABLE"},
+  {"name": "error_details", "type": "STRING", "mode": "NULLABLE"},
+  {"name": "original_payload", "type": "STRING", "mode": "NULLABLE"}
 ]
 EOF
   depends_on = [google_project_service.apis]
@@ -160,6 +193,14 @@ resource "google_service_account_iam_member" "dataflow_sa_user" {
   service_account_id = google_service_account.transformer_sa.name
   role               = "roles/iam.serviceAccountUser"
   member             = "serviceAccount:service-${data.google_project.project.number}@dataflow-service-producer-prod.iam.gserviceaccount.com"
+}
+
+# Grant the Pub/Sub service account permission to create tokens for the Dataflow worker SA.
+# This is a common requirement for Dataflow pipelines to authenticate to Pub/Sub.
+resource "google_service_account_iam_member" "pubsub_token_creator" {
+  service_account_id = google_service_account.transformer_sa.name
+  role               = "roles/iam.serviceAccountTokenCreator"
+  member             = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
 }
 
 data "google_project" "project" {}
