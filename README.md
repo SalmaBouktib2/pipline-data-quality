@@ -2,6 +2,8 @@
 
 This project implements an end-to-end data quality monitoring pipeline on Google Cloud Platform (GCP). It is designed to ingest financial symbol data, validate it against a set of data quality rules in real-time, and route valid and invalid records to separate BigQuery tables for analysis and dashboarding.
 
+![alt text](image.png)
+
 ## Architecture
 
 The pipeline follows a streaming architecture using managed GCP services:
@@ -20,9 +22,7 @@ The pipeline follows a streaming architecture using managed GCP services:
 .
 ├── dataflow/         # Apache Beam pipeline for DQ validation
 ├── publisher/        # Data publishing service (for Cloud Run)
-├── terraform/        # GCP infrastructure definitions
-├── mock_data_no_completeness.sql # Script to load sample failure data for testing
-└── README.md
+└── terraform/        # GCP infrastructure definitions
 ```
 
 ## Setup and Deployment
@@ -106,6 +106,4 @@ gcloud dataflow flex-template run "finnhub-symbol-dq-$(date +%Y%m%d-%H%M%S)" \
   --parameters "output_table=${GCP_PROJECT_ID}:finnhub_data.symbols" \
   --parameters "failure_table=${GCP_PROJECT_ID}:finnhub_data.symbols_failures"
 ```
-
-![alt text](image.png)
 
